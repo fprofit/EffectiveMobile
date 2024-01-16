@@ -13,37 +13,37 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InitializeDB(ctx context.Context, envConfig EnvConfig, logger *logrus.Logger) (*sqlx.DB, error) {
-	logger.Debug("Initializing DB connection")
+func initializeDB(ctx context.Context, config EnvConfig, log *logrus.Logger) (*sqlx.DB, error) {
+	log.Debug("Initializing DB connection")
 
 	connectionString := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		envConfig.DBHost, envConfig.DBPort, envConfig.DBUser, envConfig.DBPassword, envConfig.DBName, envConfig.DBSSLMode,
+		config.DBHost, config.DBPort, config.DBUser, config.DBPassword, config.DBName, config.DBSSLMode,
 	)
 
 	db, err := sqlx.Open("pgx", connectionString)
 	if err != nil {
-		logger.WithError(err).Error("Failed to open DB connection")
+		log.WithError(err).Error("Failed to open DB connection")
 		return nil, fmt.Errorf("InitializeDB sqlx open: %w", err)
 	}
 
-	logger.Debug("Pinging DB")
+	log.Debug("Pinging DB")
 	if err := db.PingContext(ctx); err != nil {
-		logger.WithError(err).Error("Failed to ping DB")
+		log.WithError(err).Error("Failed to ping DB")
 		db.Close()
 		return nil, fmt.Errorf("InitializeDB sqlx ping: %w", err)
 	}
 
-	logger.Info("DB connection successfully established")
+	log.Info("DB connection successfully established")
 	return db, nil
 }
 
-func Migrate(db *sqlx.DB, logger *logrus.Logger) error {
-	logger.Debug("Running database migrations")
+func migrateDB(db *sqlx.DB, log *logrus.Logger) error {
+	log.Debug("Running database migrations")
 
 	driver, err := pgx.WithInstance(db.DB, &pgx.Config{})
 	if err != nil {
-		logger.WithError(err).Error("Failed to create migrate instance")
+		log.WithError(err).Error("Failed to create migrate instance")
 		return err
 	}
 
@@ -52,16 +52,28 @@ func Migrate(db *sqlx.DB, logger *logrus.Logger) error {
 		"pgx", driver,
 	)
 	if err != nil {
-		logger.WithError(err).Error("Could not create migrate instance")
+		log.WithError(err).Error("Could not create migrate instance")
 		return fmt.Errorf("Could not create migrate instance: %w", err)
 	}
 
 	err = m.Up()
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		logger.WithError(err).Error("Failed to apply migrations")
+		log.WithError(err).Error("Failed to apply migrations")
 		return err
 	}
 
-	logger.Info("Database migrations applied successfully")
+	log.Info("Database migrations applied successfully")
 	return nil
+}
+
+func shutdownDBConnections(db *sqlx.DB, log *logrus.Logger) {
+	log.Debug("Shutting down database connection...")
+
+	if err := db.Close(); err != nil {
+		log.Error("Error closing database connection:", err)
+		return
+	}
+
+	log.Info("Database connection closed")
+	return
 }

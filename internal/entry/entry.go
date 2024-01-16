@@ -2,10 +2,13 @@ package entry
 
 import (
 	"context"
-	"fmt"
+	"os"
+	"os/signal"
 
-	"github.com/caarlos0/env"
-	"github.com/joho/godotenv"
+	"github.com/fprofit/EffectiveMobile/internal/handler"
+	"github.com/fprofit/EffectiveMobile/internal/repository"
+	"github.com/fprofit/EffectiveMobile/internal/service"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,47 +29,57 @@ type EnvConfig struct {
 }
 
 func ComposeServer() error {
-	envConfig, err := InitializeEnv()
+	envConfig, err := initializeEnv()
 	if err != nil {
 		return err
 	}
 
-	logger := InitializeLogger(envConfig)
+	log := initializelog(envConfig)
 
-	db, err := InitializeDB(context.Background(), envConfig, logger)
+	db, err := initializeDB(context.Background(), envConfig, log)
 	if err != nil {
 		return err
 	}
 
-	err = Migrate(db, logger)
+	err = migrateDB(db, log)
 	if err != nil {
 		return err
 	}
+
+	repo := repository.NewRepository(db, log)
+
+	serviceApiUrl := service.ApiUrl{
+		ApiGetAge:     envConfig.ApiGetAge,
+		ApiGetCountry: envConfig.ApiGetCountry,
+		ApiGetGender:  envConfig.ApiGetGender}
+
+	serv := service.NewService(repo, serviceApiUrl, log)
+
+	handler := handler.NewHandler(serv, log)
+	s := runServer(handler, envConfig, log)
+
+	waitForShutdown()
+
+	shutdownServer(s, log)
+	shutdownDBConnections(db, log)
 
 	return nil
-
 }
 
-func InitializeLogger(envConfig EnvConfig) *logrus.Logger {
-	logger := logrus.New()
+func initializelog(envConfig EnvConfig) *logrus.Logger {
+	log := logrus.New()
 
 	if envConfig.LOGLevel == "debug" {
-		logger.SetLevel(logrus.DebugLevel)
+		log.SetLevel(logrus.DebugLevel)
 	} else {
-		logger.SetLevel(logrus.InfoLevel)
+		log.SetLevel(logrus.InfoLevel)
 	}
 
-	return logger
+	return log
 }
 
-func InitializeEnv() (envConfig EnvConfig, err error) {
-	if err := godotenv.Load(); err != nil {
-		return EnvConfig{}, fmt.Errorf("failed to load .env file: %w", err)
-	}
-
-	if err := env.Parse(&envConfig); err != nil {
-		return EnvConfig{}, fmt.Errorf("failed to parse env from environment variables: %w", err)
-	}
-
-	return envConfig, nil
+func waitForShutdown() {
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
 }
