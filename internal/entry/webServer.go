@@ -37,7 +37,7 @@ func runServer(handlers *handler.Handler, config EnvConfig, log *logrus.Logger) 
 		}
 	}()
 
-	log.Info("Server started on port: ", config.AppPort)
+	log.Info("Server started on port: ", s.Addr)
 	return s
 }
 
