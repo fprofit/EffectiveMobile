@@ -9,6 +9,8 @@ type ErrorMsg struct {
 	Message    string `json:"message"`
 }
 
+var ErrorStatusInternalServerError = ErrorMsg{StatusCode: 500, Message: "Что-то пошло не так, попробуйте еще раз"}
+
 func NewErrorMsg(statusCode int, message string) ErrorMsg {
 	return ErrorMsg{
 		StatusCode: statusCode,

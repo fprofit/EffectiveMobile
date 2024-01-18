@@ -7,8 +7,10 @@ import (
 )
 
 type service interface {
-	AddUser(c *gin.Context, addUser models.AddUser) (models.ResponseUser, error)
-	DelUser(c *gin.Context, id int64) error
+	AddPerson(addUser models.Person) (models.EnrichedPerson, error)
+	DelPerson(id int64) error
+	UpdPerson(person models.EnrichedPerson) (models.EnrichedPerson, error)
+	GetPersonsByFilter(filter models.PersonFilter) (models.PersonList, error)
 }
 
 type Handler struct {
@@ -23,9 +25,9 @@ func NewHandler(service service, log *logrus.Logger) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-	router.POST("/user", h.addUser)
-	router.GET("/user", h.getUsers)
-	router.PUT("/user/:id", h.updUser)
-	router.DELETE("/user/:id", h.delUser)
+	router.POST("/person", h.addPerson)
+	router.GET("/persons", h.getPersons)
+	router.PUT("/person/:id", h.updPerson)
+	router.DELETE("/person/:id", h.delPerson)
 	return router
 }
