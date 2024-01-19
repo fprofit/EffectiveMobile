@@ -41,6 +41,11 @@ GET_GENDER=https://api.genderize.io
 ## REST Методы
 Сервис предоставляет следующие REST-методы:
 
+### SWAGGER
+```
+http://localhost:8080/swagger/index.html#/
+```
+
 ### Добавление новых людей:
 
 - Метод: POST
