@@ -10,20 +10,20 @@ import (
 func createFilterQuery(filter models.PersonFilter) string {
 	var conditions []string
 
-	if filter.MinAge != nil {
+	if filter.Age != nil {
+		conditions = append(conditions, fmt.Sprintf("age = %d", *filter.Age))
+	}
+	if filter.MinAge != nil && filter.Age != nil {
 		conditions = append(conditions, fmt.Sprintf("age >= %d", *filter.MinAge))
 	}
-	if filter.MaxAge != nil {
+	if filter.MaxAge != nil && filter.Age != nil {
 		conditions = append(conditions, fmt.Sprintf("age <= %d", *filter.MaxAge))
 	}
-	if filter.Gender != nil {
+	if filter.Gender != nil && (*filter.Gender == "male" || *filter.Gender == "female") {
 		conditions = append(conditions, fmt.Sprintf("gender = '%s'", *filter.Gender))
 	}
 	if filter.Name != nil {
 		conditions = append(conditions, fmt.Sprintf("name = '%s'", *filter.Name))
-	}
-	if filter.Age != nil {
-		conditions = append(conditions, fmt.Sprintf("age = %d", *filter.Age))
 	}
 	if filter.Surname != nil {
 		conditions = append(conditions, fmt.Sprintf("surname = '%s'", *filter.Surname))

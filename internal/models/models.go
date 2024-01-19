@@ -11,9 +11,9 @@ type EnrichedPerson struct {
 	Name       *string `json:"name" db:"name"`
 	Surname    *string `json:"surname" db:"surname"`
 	Patronymic *string `json:"patronymic,omitempty" db:"patronymic"`
-	Age        *int    `db:"age" db:"age"`
-	Gender     *string `db:"gender" db:"gender"`
-	CountryID  *string `db:"country_id" db:"country_id"`
+	Age        *int    `json:"age" db:"age"`
+	Gender     *string `json:"gender" db:"gender"`
+	CountryID  *string `json:"country_id" db:"country_id"`
 }
 
 type PersonList struct {
@@ -26,6 +26,7 @@ type PersonList struct {
 type PersonFilter struct {
 	Limit   int64   `form:"limit"`
 	Offset  int64   `form:"offset"`
+	Sort    *string `form:"sort"`
 	MinAge  *int    `form:"min_age"`
 	MaxAge  *int    `form:"max_age"`
 	Age     *int    `form:"age"`

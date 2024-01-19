@@ -80,7 +80,7 @@ func (s *Service) UpdPerson(person models.EnrichedPerson) (models.EnrichedPerson
 		existingPerson.Age = person.Age
 		flag = false
 	}
-	if person.Gender != nil && *person.Gender != *existingPerson.Gender {
+	if person.Gender != nil && *person.Gender != *existingPerson.Gender && (*person.Gender == "male" || *person.Gender == "female") {
 		s.log.Debugf("Updating Gender: %s -> %s", *existingPerson.Gender, *person.Gender)
 		existingPerson.Gender = person.Gender
 		flag = false

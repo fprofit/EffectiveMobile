@@ -113,7 +113,7 @@ func (r *Repository) GetPersons(filter models.PersonFilter) (models.PersonList, 
 		filter.Limit = 10
 	}
 	filterQuery := createFilterQuery(filter)
-	sqlQuery := fmt.Sprintf("SELECT * FROM persons %s LIMIT %d OFFSET %d", filterQuery, filter.Limit, filter.Offset)
+	sqlQuery := fmt.Sprintf("SELECT * FROM persons %s ORDER BY %s ASC, id ASC LIMIT %d OFFSET %d", filterQuery, *filter.Sort, filter.Limit, filter.Offset)
 	r.log.Debugf("Executing SQL query: %s", sqlQuery)
 
 	var persons []models.EnrichedPerson

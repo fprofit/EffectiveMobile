@@ -32,6 +32,12 @@ func (h *Handler) updPerson(c *gin.Context) {
 	}
 
 	data.ID = id
+	if err := checkJSONUpdPerson(data); err != nil {
+		h.log.Debugf("Error checkJSONUpdPerson: %s", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, errorResponse.NewErrorMsg(http.StatusBadRequest, err.Error()))
+		return
+	}
+
 	h.log.Debugf("Handler updPerson data: %s", utils.StructToString(data))
 	res, err := h.service.UpdPerson(data)
 	if err != nil {
