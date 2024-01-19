@@ -10,6 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Добавление новых людей
+// @Description Добавляет нового человека в систему.
+// @ID add-person
+// @Accept json
+// @Produce json
+// @Param input body models.Person true "Данные нового человека"
+// @Success 200 {object} models.EnrichedPerson "Данные добавленного человека"
+// @Failure 400 {object} errorResponse.ErrorResponse "Некорректное тело запроса или отсутствует обязательное поле"
+// @Failure 500 {object} errorResponse.ErrorResponse "Произошла ошибка во время запроса в сторонний API или база данных не отвечает"
+// @Router /person [post]
 func (h *Handler) addPerson(c *gin.Context) {
 	h.log.Debug("Handler addPerson")
 

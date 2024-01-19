@@ -11,6 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Удаление по идентификатору
+// @Description Удаляет человека по указанному идентификатору.
+// @ID delete-person-by-id
+// @Param id path int true "Идентификатор человека" Format(int64)
+// @Produce json
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} errorResponse.ErrorResponse
+// @Failure 404 {object} errorResponse.ErrorResponse
+// @Failure 500 {object} errorResponse.ErrorResponse
+// @Router /person/{id} [delete]
 func (h *Handler) delPerson(c *gin.Context) {
 	h.log.Debug("Handler delPerson")
 
@@ -31,5 +41,5 @@ func (h *Handler) delPerson(c *gin.Context) {
 		return
 	}
 	h.log.Debugf("Handler delPerson delete person successfully ID: %d", id)
-	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Person with ID %d deleted successfully", id)})
+	c.JSON(http.StatusOK, SuccessResponse{Message: fmt.Sprintf("Person with ID %d deleted successfully", id)})
 }

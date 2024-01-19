@@ -13,6 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Изменение сущности по идентификатору
+// @Description Изменяет данные о человеке с указанным идентификатором
+// @ID update-person
+// @Accept json
+// @Produce json
+// @Param id path int true "Идентификатор человека"
+// @Param request_body body models.EnrichedPerson true "Данные для обновления человека"
+// @Success 200 {object} models.EnrichedPerson "Данные о человеке после обновления"
+// @Failure 400 {object} errorResponse.ErrorResponse "Некорректное id, тело запроса, возраст, пол или id страны"
+// @Failure 404 {object} errorResponse.ErrorResponse "id не найдено"
+// @Failure 500 {object} errorResponse.ErrorResponse "База данных не отвечает"
+// @Router /person/{id} [put]
 func (h *Handler) updPerson(c *gin.Context) {
 	h.log.Debug("Handler updPerson")
 

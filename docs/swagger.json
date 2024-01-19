@@ -1,0 +1,337 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/person": {
+            "post": {
+                "description": "Добавляет нового человека в систему.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавление новых людей",
+                "operationId": "add-person",
+                "parameters": [
+                    {
+                        "description": "Данные нового человека",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Person"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные добавленного человека",
+                        "schema": {
+                            "$ref": "#/definitions/models.EnrichedPerson"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректное тело запроса или отсутствует обязательное поле",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Произошла ошибка во время запроса в сторонний API или база данных не отвечает",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/person/{id}": {
+            "put": {
+                "description": "Изменяет данные о человеке с указанным идентификатором",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Изменение сущности по идентификатору",
+                "operationId": "update-person",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Идентификатор человека",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления человека",
+                        "name": "request_body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.EnrichedPerson"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные о человеке после обновления",
+                        "schema": {
+                            "$ref": "#/definitions/models.EnrichedPerson"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректное id, тело запроса, возраст, пол или id страны",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "id не найдено",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "База данных не отвечает",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет человека по указанному идентификатору.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удаление по идентификатору",
+                "operationId": "delete-person-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Идентификатор человека",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/persons": {
+            "get": {
+                "description": "Возвращает список людей в соответствии с указанными фильтрами, сортировкой и пагинацией.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получение данных с различными фильтрами, сортировкой и пагинацией",
+                "operationId": "get-persons",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ограничение количества записей в результате",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Смещение относительно начала списка",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Фильтрация по возрасту (age \u003e 0)",
+                        "name": "age",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Минимальный возраст",
+                        "name": "min_age",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Максимальный возраст",
+                        "name": "max_age",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтрация по полу ('male' или 'female')",
+                        "name": "gender",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтрация по имени",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтрация по фамилии",
+                        "name": "surname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтрация по стране (Формат ISO 3166-1 alpha-2)",
+                        "name": "country",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поле для сортировки (id, name, surname, patronymic, age, gender, country_id)",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список людей с информацией о пагинации",
+                        "schema": {
+                            "$ref": "#/definitions/models.PersonList"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный возраст, пол, или id страны",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "База данных не отвечает",
+                        "schema": {
+                            "$ref": "#/definitions/errorResponse.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "errorResponse.ErrorMsg": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "errorResponse.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/errorResponse.ErrorMsg"
+                }
+            }
+        },
+        "handler.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.EnrichedPerson": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "country_id": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Person": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PersonList": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "persons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.EnrichedPerson"
+                    }
+                }
+            }
+        }
+    }
+}
