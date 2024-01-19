@@ -1,0 +1,224 @@
+definitions:
+  errorResponse.ErrorMsg:
+    properties:
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  errorResponse.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/errorResponse.ErrorMsg'
+    type: object
+  handler.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.EnrichedPerson:
+    properties:
+      age:
+        type: integer
+      country_id:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  models.Person:
+    properties:
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  models.PersonList:
+    properties:
+      count:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      persons:
+        items:
+          $ref: '#/definitions/models.EnrichedPerson'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /person:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет нового человека в систему.
+      operationId: add-person
+      parameters:
+      - description: Данные нового человека
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Person'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные добавленного человека
+          schema:
+            $ref: '#/definitions/models.EnrichedPerson'
+        "400":
+          description: Некорректное тело запроса или отсутствует обязательное поле
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+        "500":
+          description: Произошла ошибка во время запроса в сторонний API или база
+            данных не отвечает
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+      summary: Добавление новых людей
+  /person/{id}:
+    delete:
+      description: Удаляет человека по указанному идентификатору.
+      operationId: delete-person-by-id
+      parameters:
+      - description: Идентификатор человека
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+      summary: Удаление по идентификатору
+    put:
+      consumes:
+      - application/json
+      description: Изменяет данные о человеке с указанным идентификатором
+      operationId: update-person
+      parameters:
+      - description: Идентификатор человека
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления человека
+        in: body
+        name: request_body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EnrichedPerson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные о человеке после обновления
+          schema:
+            $ref: '#/definitions/models.EnrichedPerson'
+        "400":
+          description: Некорректное id, тело запроса, возраст, пол или id страны
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+        "404":
+          description: id не найдено
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+        "500":
+          description: База данных не отвечает
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+      summary: Изменение сущности по идентификатору
+  /persons:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список людей в соответствии с указанными фильтрами,
+        сортировкой и пагинацией.
+      operationId: get-persons
+      parameters:
+      - description: Ограничение количества записей в результате
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение относительно начала списка
+        in: query
+        name: offset
+        type: integer
+      - description: Фильтрация по возрасту (age > 0)
+        in: query
+        name: age
+        type: integer
+      - description: Минимальный возраст
+        in: query
+        name: min_age
+        type: integer
+      - description: Максимальный возраст
+        in: query
+        name: max_age
+        type: integer
+      - description: Фильтрация по полу ('male' или 'female')
+        in: query
+        name: gender
+        type: string
+      - description: Фильтрация по имени
+        in: query
+        name: name
+        type: string
+      - description: Фильтрация по фамилии
+        in: query
+        name: surname
+        type: string
+      - description: Фильтрация по стране (Формат ISO 3166-1 alpha-2)
+        in: query
+        name: country
+        type: string
+      - description: Поле для сортировки (id, name, surname, patronymic, age, gender,
+          country_id)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список людей с информацией о пагинации
+          schema:
+            $ref: '#/definitions/models.PersonList'
+        "400":
+          description: Некорректный возраст, пол, или id страны
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+        "500":
+          description: База данных не отвечает
+          schema:
+            $ref: '#/definitions/errorResponse.ErrorResponse'
+      summary: Получение данных с различными фильтрами, сортировкой и пагинацией
+swagger: "2.0"
